@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { fetchPopulationData } from './lib/data-fetcher';
+import { fetchPopulationData, fetchEnvironmentalData } from './lib/data-fetcher';
 import PopulationClient from './PopulationClient';
 
 export const metadata: Metadata = {
@@ -13,11 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default async function PopulationPage() {
-    const data = await fetchPopulationData();
+    const [data, environmentalData] = await Promise.all([
+        fetchPopulationData(),
+        fetchEnvironmentalData()
+    ]);
 
     return (
         <div className="h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-background">
-            <PopulationClient initialData={data} />
+            <PopulationClient initialData={data} environmentalData={environmentalData} />
         </div>
     );
 }

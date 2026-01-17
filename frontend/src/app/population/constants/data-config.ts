@@ -2,7 +2,8 @@ export const DATA_TYPES = {
     POPULATION: 'population',
     IDP: 'idp',
     IDP_RETURNEES: 'idp_returnees',
-    RAINFALL: 'rainfall'
+    RAINFALL: 'rainfall',
+    ENVIRONMENTAL: 'environmental'
 } as const;
 
 export type DataType = typeof DATA_TYPES[keyof typeof DATA_TYPES];
@@ -23,11 +24,11 @@ export const DATA_TYPE_CONFIG = {
     [DATA_TYPES.IDP]: {
         label: 'النازحين داخلياً',
         labelAr: 'النازحين',
-        colors: { none: '#2a3033', low: '#A0522D', medium: '#D2691E', high: '#FF7F50' },
+        colors: { none: '#2a3033', low: '#A0522B', medium: '#D2691E', high: '#FF7F50' },
         thresholds: [100000, 500000, 1000000],
         legend: [
             { label: 'لا توجد بيانات', color: '#2a3033' },
-            { label: 'أقل من ١٠٠ ألف', color: '#A0522D' },
+            { label: 'أقل من ١٠٠ ألف', color: '#A0522B' },
             { label: '١٠٠ ألف – ٥٠٠ ألف', color: '#D2691E' },
             { label: 'أكثر من ٥٠٠ ألف', color: '#FF7F50' }
         ]
@@ -54,6 +55,16 @@ export const DATA_TYPE_CONFIG = {
             { label: 'أقل من 100 مم', color: '#b4d7e6' },
             { label: '100 - 500 مم', color: '#66b2d6' },
             { label: 'أكثر من 500 مم', color: '#006994' }
+        ]
+    },
+    [DATA_TYPES.ENVIRONMENTAL]: {
+        label: 'البيانات البيئية',
+        labelAr: 'البيئة',
+        colors: { none: '#1e293b', low: '#0891b2', medium: '#06b6d4', high: '#22d3ee' },
+        thresholds: [1, 1, 1],
+        legend: [
+            { label: 'لا توجد بيانات', color: '#1e293b' },
+            { label: 'بيانات بيئية متاحة', color: '#0891b2' }
         ]
     }
 };

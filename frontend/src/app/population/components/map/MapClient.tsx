@@ -30,14 +30,14 @@ interface MapClientProps {
     onFeatureClick?: (feature: any) => void;
 }
 
-export default function MapClient({ 
-    geoJsonData, 
-    populationData, 
-    rainfallData, 
-    currentDataType, 
-    currentSourceId, 
-    customThresholds, 
-    onFeatureClick 
+export default function MapClient({
+    geoJsonData,
+    populationData,
+    rainfallData,
+    currentDataType,
+    currentSourceId,
+    customThresholds,
+    onFeatureClick
 }: MapClientProps) {
 
     const style = (feature: any) => {
@@ -64,12 +64,12 @@ export default function MapClient({
                 .leaflet-container {
                     -webkit-tap-highlight-color: transparent;
                     outline: none;
-                    background: ${currentDataType === DATA_TYPES.RAINFALL ? '#111827' : '#24292F'} !important;
+                    background: ${currentDataType === DATA_TYPES.RAINFALL ? '#111827' : currentDataType === DATA_TYPES.ENVIRONMENTAL ? '#0f172a' : '#24292F'} !important;
                     transition: background 0.5s ease;
                 }
                 .leaflet-interactive {
                     outline: none !important;
-                    transition: fill 0.3s ease;
+                    transition: fill 0.3s ease, stroke 0.2s ease, stroke-width 0.2s ease;
                 }
                 path.leaflet-interactive:focus {
                     outline: none;
@@ -84,6 +84,18 @@ export default function MapClient({
                 }
                 .custom-tooltip-rain:before {
                     border-top-color: rgba(15, 23, 42, 0.95);
+                }
+                .custom-tooltip-env {
+                    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
+                    border: 1px solid rgba(34, 211, 238, 0.3);
+                    color: #f8fafc;
+                    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 211, 238, 0.1);
+                    border-radius: 12px;
+                    padding: 12px;
+                    backdrop-filter: blur(12px);
+                }
+                .custom-tooltip-env:before {
+                    border-top-color: rgba(15, 23, 42, 0.98) !important;
                 }
                 .custom-tooltip {
                     background-color: white;
