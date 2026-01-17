@@ -2,8 +2,10 @@ import { parseCSVToObjects } from './csv-parser';
 import { PopulationGroups } from '../types';
 import { DATA_TYPES } from '../constants/data-config';
 import { CSV_URL } from '../constants/api-config';
-import { DataSource } from '../types/data-types';
+import { DataSource, EnvironmentalData } from '../types/data-types';
 import { standardizeCityNames } from '@/lib/city-name-standardizer';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 type DataType = typeof DATA_TYPES[keyof typeof DATA_TYPES];
 
@@ -18,7 +20,8 @@ export async function fetchPopulationData(): Promise<PopulationGroups> {
             [DATA_TYPES.POPULATION]: [],
             [DATA_TYPES.IDP]: [],
             [DATA_TYPES.IDP_RETURNEES]: [],
-            [DATA_TYPES.RAINFALL]: []
+            [DATA_TYPES.RAINFALL]: [],
+            [DATA_TYPES.ENVIRONMENTAL]: []
         };
 
         const sourceMap: { [key: string]: DataSource } = {};
@@ -62,7 +65,34 @@ export async function fetchPopulationData(): Promise<PopulationGroups> {
             [DATA_TYPES.POPULATION]: [],
             [DATA_TYPES.IDP]: [],
             [DATA_TYPES.IDP_RETURNEES]: [],
-            [DATA_TYPES.RAINFALL]: []
+            [DATA_TYPES.RAINFALL]: [],
+            [DATA_TYPES.ENVIRONMENTAL]: []
         };
+    }
+}
+
+export async function fetchEnvironmentalData(): Promise<DataSource[]> {
+    try {
+        const filePath = path.join(process.cwd(), 'src', 'app', 'population', 'syria_environmental_data_report.json');
+        const fileContent = await readFile(filePath, 'utf-8');
+        const envData: EnvironmentalData = JSON.parse(fileContent);
+
+        const cities: { [cityName: string]: number } = {};
+        Object.keys(envData.cities).forEach(city => {
+            cities[city] = 1;
+        });
+
+        return [{
+            source_id: 1,
+            source_url: 'https://open-meteo.com/',
+            date: envData.metadata.report_date.split('T')[0],
+            note: 'البيانات البيئية والمناخية',
+            data_type: DATA_TYPES.ENVIRONMENTAL,
+            cities: standardizeCityNames(cities)
+        }];
+
+    } catch (error) {
+        console.error('Error fetching environmental data:', error);
+        return [];
     }
 }
