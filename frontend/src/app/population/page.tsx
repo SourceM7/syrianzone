@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { fetchPopulationData } from './lib/data-fetcher';
+import { fetchPopulationData, fetchEnvironmentalData } from './lib/data-fetcher';
 import PopulationClient from './PopulationClient';
 
 export const metadata: Metadata = {

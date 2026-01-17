@@ -338,6 +338,17 @@ export default function PopulationClient() {
                                 setSelectedRainfallProvince({ name: nameAr, data: rData });
                                 if (window.innerWidth < 768) setIsPanelOpen(true);
                             }
+                        } else if (currentDataType === DATA_TYPES.ENVIRONMENTAL) {
+                            const name = feature.properties.province_name || feature.properties.ADM2_AR || feature.properties.ADM1_AR || feature.properties.Name;
+                            const nameAr = getCanonicalCityName(name);
+
+                            const englishName = ARABIC_TO_ENGLISH_CITY_MAP[nameAr] || nameAr;
+                            const envData = environmentalDataRaw.cities[nameAr] || environmentalDataRaw.cities[englishName] || environmentalDataRaw.cities[name];
+
+                            if (envData) {
+                                setSelectedEnvironmentalProvince({ name: nameAr, data: envData });
+                                if (window.innerWidth < 768) setIsPanelOpen(true);
+                            }
                         }
 
                         // --- HANDLE ENVIRONMENTAL CLICK ---
@@ -356,7 +367,7 @@ export default function PopulationClient() {
                 />
 
                 {/* Legend Overlay */}
-                <div className="absolute bottom-6 right-6 z-[400] bg-card/90 backdrop-blur p-3 rounded shadow-lg border border-border text-sm min-w-[150px]">
+                <div className="absolute bottom-6 right-6 z-[400] bg-card/90 backdrop-blur p-3 rounded-lg shadow-lg border border-border text-sm min-w-[150px]">
                     <h4 className="font-bold mb-2 text-foreground flex items-center gap-2">
                         {currentDataType === DATA_TYPES.RAINFALL && <CloudRain size={16} className="text-primary" />}
                         {currentDataType === DATA_TYPES.ENVIRONMENTAL && <ThermometerSun size={16} className="text-primary" />}
@@ -368,8 +379,27 @@ export default function PopulationClient() {
                                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></span>
                                 <span className="text-muted-foreground text-xs">{item.label}</span>
                             </div>
-                        ))}
-                    </div>
+                            <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                                <span>+30°</span>
+                                <span>+20°</span>
+                                <span>+10°</span>
+                                <span>0°</span>
+                            </div>
+                            <div className="mt-2 pt-2 border-t border-border/50 flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-slate-700"></span>
+                                <span className="text-muted-foreground text-xs">لا توجد بيانات</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-1.5">
+                            {config.legend.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></span>
+                                    <span className="text-muted-foreground text-xs">{item.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -673,6 +703,420 @@ export default function PopulationClient() {
                                     <ThermometerSun className="opacity-50 mb-4" size={48} />
                                     <h3 className="font-bold text-foreground mb-2">بيانات المناخ</h3>
                                     <p className="text-sm leading-relaxed mb-6">اختر محافظة من الخريطة لعرض تفاصيل الطقس، جودة الهواء، ومؤشرات الجفاف والتغير المناخي.</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : currentDataType === DATA_TYPES.ENVIRONMENTAL ? (
+                        /* OPTION 2: ENVIRONMENTAL PANEL CONTENT */
+                        <div className="flex flex-col h-full">
+                            {selectedEnvironmentalProvince ? (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                                    {/* Enhanced Header with Weather Icon */}
+                                    <div className="relative overflow-hidden rounded-xl p-4 bg-gradient-to-br from-sky-500/20 via-cyan-500/10 to-emerald-500/20 border border-sky-500/20">
+                                        <div className="absolute top-2 left-2 opacity-20">
+                                            {getWeatherIcon(selectedEnvironmentalProvince.data.current_conditions.weather_description)}
+                                        </div>
+                                        <div className="flex justify-between items-start relative z-10">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                                                    {getWeatherIcon(selectedEnvironmentalProvince.data.current_conditions.weather_description)}
+                                                    {selectedEnvironmentalProvince.name}
+                                                </h3>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <MapPin size={12} className="text-muted-foreground" />
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {selectedEnvironmentalProvince.data.coordinates.latitude.toFixed(2)}°N, {selectedEnvironmentalProvince.data.coordinates.longitude.toFixed(2)}°E
+                                                    </span>
+                                                </div>
+                                                {selectedEnvironmentalProvince.data.population && (
+                                                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                                                        <span>السكان: </span>
+                                                        <span className="font-semibold text-foreground">{selectedEnvironmentalProvince.data.population.toLocaleString()}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => setSelectedEnvironmentalProvince(null)}
+                                                className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors text-muted-foreground backdrop-blur-sm"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                        <div className="mt-3 text-center">
+                                            <span className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                                                {selectedEnvironmentalProvince.data.current_conditions.temperature_celsius}°C
+                                            </span>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                يحس وكأنها {selectedEnvironmentalProvince.data.current_conditions.feels_like_celsius}°C
+                                            </p>
+                                            <p className="text-sm text-foreground/80 mt-1">
+                                                {selectedEnvironmentalProvince.data.current_conditions.weather_description}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Tomorrow's Forecast Card */}
+                                    <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-lg p-3 border border-indigo-500/20">
+                                        <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                            <Calendar size={14} className="text-indigo-400" />
+                                            توقعات الغد
+                                        </h4>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="text-center">
+                                                    <TrendingUp size={14} className="mx-auto text-red-400 mb-1" />
+                                                    <span className="text-lg font-bold text-red-400">
+                                                        {selectedEnvironmentalProvince.data.daily_forecast_summary.tomorrow_max_temp_c}°
+                                                    </span>
+                                                    <p className="text-[10px] text-muted-foreground">القصوى</p>
+                                                </div>
+                                                <div className="h-8 w-px bg-border/50"></div>
+                                                <div className="text-center">
+                                                    <TrendingDown size={14} className="mx-auto text-blue-400 mb-1" />
+                                                    <span className="text-lg font-bold text-blue-400">
+                                                        {selectedEnvironmentalProvince.data.daily_forecast_summary.tomorrow_min_temp_c}°
+                                                    </span>
+                                                    <p className="text-[10px] text-muted-foreground">الدنيا</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <CloudRain size={16} className="mx-auto text-cyan-400 mb-1" />
+                                                <span className="text-sm font-bold text-cyan-400">
+                                                    {selectedEnvironmentalProvince.data.daily_forecast_summary.tomorrow_precipitation_mm} ملم
+                                                </span>
+                                                <p className="text-[10px] text-muted-foreground">الهطول المتوقع</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Enhanced Current Conditions */}
+                                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+                                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-foreground">
+                                            <Thermometer size={16} className="text-orange-500" />
+                                            الظروف الحالية
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-orange-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <Thermometer size={12} className="group-hover:text-orange-400 transition-colors" /> درجة الحرارة
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.temperature_celsius}°C</span>
+                                                <p className="text-[10px] text-muted-foreground">يحس: {selectedEnvironmentalProvince.data.current_conditions.feels_like_celsius}°</p>
+                                            </div>
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-blue-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <Droplets size={12} className="group-hover:text-blue-400 transition-colors" /> الرطوبة
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.humidity_percent}%</span>
+                                                <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
+                                                    <div className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500" style={{ width: `${selectedEnvironmentalProvince.data.current_conditions.humidity_percent}%` }}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-slate-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <Wind size={12} className="group-hover:text-slate-400 transition-colors" /> الرياح
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.wind_speed_kmh}</span>
+                                                <span className="text-xs text-muted-foreground mr-1">كم/س</span>
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <Compass size={10} className="text-slate-400" style={{ transform: `rotate(${selectedEnvironmentalProvince.data.current_conditions.wind_direction_degrees}deg)` }} />
+                                                    <span className="text-[10px] text-muted-foreground">{getWindDirection(selectedEnvironmentalProvince.data.current_conditions.wind_direction_degrees)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-purple-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <Gauge size={12} className="group-hover:text-purple-400 transition-colors" /> الضغط الجوي
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.pressure_msl_hpa.toFixed(0)}</span>
+                                                <span className="text-[10px] text-muted-foreground mr-1">hPa</span>
+                                            </div>
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-sky-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <Cloud size={12} className="group-hover:text-sky-400 transition-colors" /> الغطاء السحابي
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.cloud_cover_percent}%</span>
+                                                <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
+                                                    <div className="h-full bg-gradient-to-r from-slate-400 to-slate-600 transition-all duration-500" style={{ width: `${selectedEnvironmentalProvince.data.current_conditions.cloud_cover_percent}%` }}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-card/80 backdrop-blur-sm p-2.5 rounded-lg border border-border/30 hover:border-cyan-500/30 transition-colors group">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                                                    <CloudRain size={12} className="group-hover:text-cyan-400 transition-colors" /> الهطول الحالي
+                                                </div>
+                                                <span className="text-lg font-bold">{selectedEnvironmentalProvince.data.current_conditions.precipitation_mm}</span>
+                                                <span className="text-[10px] text-muted-foreground mr-1">ملم</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Air Quality */}
+                                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+                                        <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-foreground">
+                                            <Activity size={16} className="text-green-500" />
+                                            جودة الهواء
+                                        </h4>
+                                        <div className="flex items-center gap-4 mb-3">
+                                            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center ${selectedEnvironmentalProvince.data.air_quality.estimated_aqi <= 50
+                                                ? 'bg-gradient-to-br from-green-400/20 to-emerald-500/20 border-2 border-green-500/50'
+                                                : selectedEnvironmentalProvince.data.air_quality.estimated_aqi <= 100
+                                                    ? 'bg-gradient-to-br from-yellow-400/20 to-amber-500/20 border-2 border-yellow-500/50'
+                                                    : 'bg-gradient-to-br from-red-400/20 to-orange-500/20 border-2 border-red-500/50'
+                                                }`}>
+                                                <span className={`text-2xl font-bold ${selectedEnvironmentalProvince.data.air_quality.estimated_aqi <= 50
+                                                    ? 'text-green-500'
+                                                    : selectedEnvironmentalProvince.data.air_quality.estimated_aqi <= 100
+                                                        ? 'text-yellow-500'
+                                                        : 'text-red-500'
+                                                    }`}>
+                                                    {selectedEnvironmentalProvince.data.air_quality.estimated_aqi}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-foreground">{selectedEnvironmentalProvince.data.air_quality.category}</p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">مؤشر جودة الهواء (AQI)</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground bg-primary/5 p-2 rounded-lg border border-primary/10">
+                                            {selectedEnvironmentalProvince.data.air_quality.health_recommendation}
+                                        </p>
+                                    </div>
+
+                                    {/* Drought Risk */}
+                                    {selectedEnvironmentalProvince.data.drought_risk && Object.keys(selectedEnvironmentalProvince.data.drought_risk).length > 0 && (
+                                        <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+                                            <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-foreground">
+                                                <AlertTriangle size={16} className="text-amber-500" />
+                                                مخاطر الجفاف
+                                            </h4>
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${selectedEnvironmentalProvince.data.drought_risk?.drought_risk === 'Very High'
+                                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                                    : selectedEnvironmentalProvince.data.drought_risk?.drought_risk === 'High'
+                                                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                                                        : selectedEnvironmentalProvince.data.drought_risk?.drought_risk === 'Moderate'
+                                                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                                            : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                    }`}>
+                                                    {selectedEnvironmentalProvince.data.drought_risk?.drought_risk || 'غير متوفر'}
+                                                </div>
+                                                <span className="text-xs text-muted-foreground">{selectedEnvironmentalProvince.data.drought_risk?.classification || ''}</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div className="bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-[10px] text-muted-foreground block">الهطول السنوي</span>
+                                                    <span className="text-sm font-bold text-cyan-400">{selectedEnvironmentalProvince.data.drought_risk?.annual_precipitation_mm?.toFixed(1) || 0} ملم</span>
+                                                </div>
+                                                <div className="bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-[10px] text-muted-foreground block">أشهر الجفاف</span>
+                                                    <span className="text-sm font-bold text-amber-400">{selectedEnvironmentalProvince.data.drought_risk?.dry_season_months?.length || 0} أشهر</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Climate Trends */}
+                                    {selectedEnvironmentalProvince.data.climate_trends && Object.keys(selectedEnvironmentalProvince.data.climate_trends).length > 0 && (
+                                        <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+                                            <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-foreground">
+                                                <TrendingDown size={16} className="text-blue-500" />
+                                                اتجاهات المناخ
+                                            </h4>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <Thermometer size={12} /> تغير الحرارة
+                                                    </span>
+                                                    <span className={`text-xs font-bold flex items-center gap-1 ${selectedEnvironmentalProvince.data.climate_trends.temperature_trend_celsius < 0 ? 'text-blue-400' : 'text-red-400'
+                                                        }`}>
+                                                        {selectedEnvironmentalProvince.data.climate_trends.temperature_trend_celsius < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                                                        {selectedEnvironmentalProvince.data.climate_trends.temperature_trend_celsius}°C
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground">معدل التغير السنوي</span>
+                                                    <span className="text-xs font-medium">{selectedEnvironmentalProvince.data.climate_trends.temperature_change_rate_per_year}°C/سنة</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <CloudRain size={12} /> تغير الهطول
+                                                    </span>
+                                                    <span className={`text-xs font-bold flex items-center gap-1 ${selectedEnvironmentalProvince.data.climate_trends.rainfall_trend_mm < 0 ? 'text-amber-400' : 'text-cyan-400'
+                                                        }`}>
+                                                        {selectedEnvironmentalProvince.data.climate_trends.rainfall_trend_mm < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                                                        {selectedEnvironmentalProvince.data.climate_trends.rainfall_trend_mm} ملم
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground">متوسط الهطول السنوي</span>
+                                                    <span className="text-xs font-medium">{selectedEnvironmentalProvince.data.climate_trends.average_annual_rainfall_mm} ملم</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <Gauge size={12} /> متوسط الضغط السطحي
+                                                    </span>
+                                                    <span className="text-xs font-medium">{selectedEnvironmentalProvince.data.climate_trends.avg_surface_pressure_hpa?.toFixed(1)} hPa</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Historical Summary */}
+                                    {selectedEnvironmentalProvince.data.historical_summary && Object.keys(selectedEnvironmentalProvince.data.historical_summary).length > 0 && (
+                                        <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
+                                            <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                                <Calendar size={16} className="text-purple-500" />
+                                                الملخص التاريخي
+                                            </h4>
+                                            <p className="text-[10px] text-muted-foreground mb-3 flex items-center gap-1">
+                                                <span>الفترة:</span>
+                                                <span className="font-medium text-foreground">
+                                                    {selectedEnvironmentalProvince.data.historical_summary.period_start} إلى {selectedEnvironmentalProvince.data.historical_summary.period_end}
+                                                </span>
+                                            </p>
+                                            <div className="space-y-2">
+                                                <div className="bg-card/50 p-2 rounded-lg">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="text-xs text-muted-foreground">نطاق الحرارة</span>
+                                                        <span className="text-xs font-medium">
+                                                            <span className="text-blue-400">{selectedEnvironmentalProvince.data.historical_summary.avg_min_temp_c}°</span>
+                                                            <span className="text-muted-foreground mx-1">—</span>
+                                                            <span className="text-red-400">{selectedEnvironmentalProvince.data.historical_summary.avg_max_temp_c}°</span>
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-2 bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 rounded-full"></div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <CloudRain size={12} /> إجمالي الهطول
+                                                    </span>
+                                                    <span className="text-xs font-bold text-cyan-400">{selectedEnvironmentalProvince.data.historical_summary.total_precipitation_mm} ملم</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <Wind size={12} /> أعلى سرعة رياح
+                                                    </span>
+                                                    <span className="text-xs font-medium">{selectedEnvironmentalProvince.data.historical_summary.max_wind_speed_kmh} كم/س</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-card/50 p-2 rounded-lg">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <Gauge size={12} /> متوسط الضغط السطحي
+                                                    </span>
+                                                    <span className="text-xs font-medium">{selectedEnvironmentalProvince.data.historical_summary.avg_surface_pressure_hpa?.toFixed(1)} hPa</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Data Sources */}
+                                    <div className="bg-gradient-to-r from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/20">
+                                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">مصادر البيانات</span>
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                            {environmentalDataRaw.metadata.data_sources.map((source, idx) => (
+                                                <span key={idx} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                                    {source}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* Country-Level Summary when no province selected */
+                                <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                                    <div className="text-center py-4">
+                                        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
+                                            <Leaf size={32} className="text-emerald-500" />
+                                        </div>
+                                        <h3 className="font-bold text-lg text-foreground mb-1">البيانات البيئية لسوريا</h3>
+                                        <p className="text-xs text-muted-foreground">
+                                            اختر محافظة من الخريطة لعرض التفاصيل
+                                        </p>
+                                    </div>
+
+                                    {/* Key Findings */}
+                                    <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg p-3 border border-amber-500/20">
+                                        <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                            <AlertTriangle size={16} className="text-amber-500" />
+                                            النتائج الرئيسية
+                                        </h4>
+                                        <ul className="space-y-2">
+                                            {environmentalDataRaw.summary.key_findings.map((finding, idx) => (
+                                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                                    <span className="text-amber-400 mt-0.5">•</span>
+                                                    {finding}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Climate Challenges */}
+                                    <div className="bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-lg p-3 border border-red-500/20">
+                                        <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                            <Thermometer size={16} className="text-red-400" />
+                                            التحديات المناخية
+                                        </h4>
+                                        <ul className="space-y-1.5">
+                                            {environmentalDataRaw.country_level.climate_context.main_climate_challenges.map((challenge, idx) => (
+                                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                                    <span className="text-red-400 mt-0.5">•</span>
+                                                    {challenge}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Key Water Basins */}
+                                    <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-lg p-3 border border-cyan-500/20">
+                                        <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                            <Droplets size={16} className="text-cyan-400" />
+                                            الأحواض المائية الرئيسية
+                                        </h4>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {environmentalDataRaw.country_level.climate_context.key_water_basins.map((basin, idx) => (
+                                                <span key={idx} className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded-full border border-cyan-500/20">
+                                                    {basin}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Recommendations */}
+                                    <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-lg p-3 border border-emerald-500/20">
+                                        <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-foreground">
+                                            <Leaf size={16} className="text-emerald-400" />
+                                            التوصيات
+                                        </h4>
+                                        <ul className="space-y-1.5">
+                                            {environmentalDataRaw.summary.recommendations.map((rec, idx) => (
+                                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                                    <span className="text-emerald-400 mt-0.5">✓</span>
+                                                    {rec}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Climate Classification */}
+                                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center">
+                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">التصنيف المناخي</span>
+                                        <p className="text-sm font-bold text-foreground mt-1">
+                                            {environmentalDataRaw.country_level.climate_context.classification}
+                                        </p>
+                                    </div>
+
+                                    {/* Data Info */}
+                                    <div className="bg-primary/5 p-3 rounded-lg border border-primary/10">
+                                        <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                            <span>المدن المحللة</span>
+                                            <span className="font-bold text-primary">{environmentalDataRaw.summary.total_cities_analyzed}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                            {environmentalDataRaw.metadata.data_sources.map((source, idx) => (
+                                                <span key={idx} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                                    {source}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>

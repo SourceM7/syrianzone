@@ -44,7 +44,7 @@ export function generateRainChartHtml(name: string, data: any[]) {
 export function generatePopulationTooltipHtml(name: string, value: number, label: string) {
     const displayName = getCanonicalCityName(name);
     const valueStr = value ? value.toLocaleString('en-US') : 'لا توجد بيانات';
-    
+
     return `
         <div class="text-right" style="font-family: 'IBM Plex Sans Arabic', sans-serif;">
             <div class="font-bold text-base mb-1">${displayName}</div>
