@@ -7,6 +7,7 @@ use App\Http\Controllers\PollController;
 use App\Http\Controllers\ContributorController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\Api\PopulationAtlasController;
 
 Route::get('/polls', [PollController::class, 'index']);
 Route::get('/polls/{poll}', [PollController::class, 'show']);
@@ -33,6 +34,10 @@ Route::get('/contributors', [ContributorController::class, 'index']);
 Route::get('/contributors/{contributor}', [ContributorController::class, 'show']);
 
 Route::get('/sites', [SiteController::class, 'index']);
+
+Route::get('/population/master', [PopulationAtlasController::class, 'getData']);
+Route::get('/population/env-report', [PopulationAtlasController::class, 'getEnvironmentalDetails']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sites', [SiteController::class, 'store']);
     Route::put('/sites/{id}', [SiteController::class, 'update']);

@@ -2,7 +2,8 @@ export const DATA_TYPES = {
     POPULATION: 'population',
     IDP: 'idp',
     IDP_RETURNEES: 'idp_returnees',
-    RAINFALL: 'rainfall'
+    RAINFALL: 'rainfall',
+    ENVIRONMENTAL: 'environmental'
 } as const;
 
 export type DataType = typeof DATA_TYPES[keyof typeof DATA_TYPES];
@@ -54,6 +55,17 @@ export const DATA_TYPE_CONFIG = {
             { label: 'أقل من 100 مم', color: '#b4d7e6' },
             { label: '100 - 500 مم', color: '#66b2d6' },
             { label: 'أكثر من 500 مم', color: '#006994' }
+        ]
+    },
+
+    [DATA_TYPES.ENVIRONMENTAL]: {
+        label: 'البيئة والمناخ',
+        labelAr: 'المناخ',
+        colors: { none: '#2a3033', low: '#065f46', medium: '#059669', high: '#10b981' },
+        thresholds: [1, 2, 3], // Adjust based on your logic
+        legend: [
+            { label: 'بيانات المناخ', color: '#10b981' },
+            { label: 'لا توجد بيانات', color: '#2a3033' }
         ]
     }
 };

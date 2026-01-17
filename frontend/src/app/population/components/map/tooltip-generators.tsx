@@ -52,3 +52,86 @@ export function generatePopulationTooltipHtml(name: string, value: number, label
         </div>
     `;
 }
+
+export function generateEnvironmentalTooltipHtml(name: string, data: any) {
+    const displayName = getCanonicalCityName(name);
+    const temp = data.current_conditions?.temperature_celsius || 0;
+    const feelsLike = data.current_conditions?.feels_like_celsius || temp;
+    const humidity = data.current_conditions?.humidity_percent || 0;
+    const windSpeed = data.current_conditions?.wind_speed_kmh || 0;
+    const weatherDesc = data.current_conditions?.weather_description || '';
+    const aqi = data.air_quality?.estimated_aqi || 0;
+    const droughtRisk = data.drought_risk?.drought_risk || 'N/A';
+
+    // Weather icon based on description
+    let weatherIcon = '☀️';
+    const desc = (weatherDesc || '').toLowerCase();
+    if (desc.includes('rain') || desc.includes('drizzle')) weatherIcon = '🌧️';
+    else if (desc.includes('overcast') || desc.includes('cloudy')) weatherIcon = '☁️';
+    else if (desc.includes('partly') || desc.includes('mainly clear')) weatherIcon = '⛅';
+    else if (desc.includes('snow')) weatherIcon = '❄️';
+    else if (desc.includes('fog') || desc.includes('mist')) weatherIcon = '🌫️';
+    else if (desc.includes('thunder') || desc.includes('storm')) weatherIcon = '⚡';
+
+    // Temperature color
+    let tempColor = '#22d3ee'; // cyan
+    if (temp <= 5) tempColor = '#3b82f6';
+    else if (temp <= 10) tempColor = '#06b6d4';
+    else if (temp <= 15) tempColor = '#14b8a6';
+    else if (temp <= 20) tempColor = '#22c55e';
+    else if (temp <= 25) tempColor = '#eab308';
+    else if (temp <= 30) tempColor = '#f97316';
+    else tempColor = '#ef4444';
+
+    // AQI color
+    let aqiColor = '#22c55e';
+    let aqiBg = 'rgba(34, 197, 94, 0.2)';
+    if (aqi > 100) { aqiColor = '#ef4444'; aqiBg = 'rgba(239, 68, 68, 0.2)'; }
+    else if (aqi > 50) { aqiColor = '#eab308'; aqiBg = 'rgba(234, 179, 8, 0.2)'; }
+
+    // Drought color
+    let droughtColor = '#22c55e';
+    if (droughtRisk === 'Very High') droughtColor = '#ef4444';
+    else if (droughtRisk === 'High') droughtColor = '#f97316';
+    else if (droughtRisk === 'Moderate') droughtColor = '#eab308';
+
+    return `
+        <div style="font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; min-width: 180px; direction: rtl;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 28px; line-height: 1;">${weatherIcon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 14px; color: #f8fafc;">${displayName}</div>
+                    <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">${weatherDesc}</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px;">
+                <span style="font-size: 32px; font-weight: 700; color: ${tempColor}; font-family: monospace;">${temp}°</span>
+                <span style="font-size: 11px; color: #64748b;">يحس كـ ${feelsLike}°</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div style="background: rgba(59, 130, 246, 0.15); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <div style="font-size: 9px; color: #94a3b8; margin-bottom: 2px;">💧 الرطوبة</div>
+                    <div style="font-size: 13px; font-weight: 600; color: #60a5fa; font-family: monospace;">${humidity}%</div>
+                </div>
+                <div style="background: rgba(148, 163, 184, 0.15); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                    <div style="font-size: 9px; color: #94a3b8; margin-bottom: 2px;">💨 الرياح</div>
+                    <div style="font-size: 13px; font-weight: 600; color: #cbd5e1; font-family: monospace;">${windSpeed} <span style="font-size: 9px;">كم/س</span></div>
+                </div>
+                <div style="background: ${aqiBg}; padding: 6px 8px; border-radius: 6px; border: 1px solid ${aqiColor}30;">
+                    <div style="font-size: 9px; color: #94a3b8; margin-bottom: 2px;">🌬️ جودة الهواء</div>
+                    <div style="font-size: 13px; font-weight: 600; color: ${aqiColor}; font-family: monospace;">${aqi} AQI</div>
+                </div>
+                <div style="background: rgba(251, 146, 60, 0.15); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(251, 146, 60, 0.2);">
+                    <div style="font-size: 9px; color: #94a3b8; margin-bottom: 2px;">🏜️ الجفاف</div>
+                    <div style="font-size: 11px; font-weight: 600; color: ${droughtColor};">${droughtRisk}</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                <span style="font-size: 9px; color: #64748b;">انقر للتفاصيل الكاملة</span>
+            </div>
+        </div>
+    `;
+}

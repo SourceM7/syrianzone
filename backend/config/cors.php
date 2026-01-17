@@ -15,11 +15,17 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => [
+    'api/*', 
+    'sanctum/csrf-cookie', 
+    'user',     // Add this
+    'logout',   // Add this
+    'auth/*',   // Add this for Google Auth routes
+],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000', 'http://localhost:8001'],
+    'allowed_origins' => ['http://localhost:3000', 'http://127.0.0.1:3000'],
 
     'allowed_origins_patterns' => [],
 

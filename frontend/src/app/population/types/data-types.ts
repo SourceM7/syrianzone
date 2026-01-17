@@ -18,4 +18,5 @@ export interface PopulationGroups {
     idp: DataSource[];
     idp_returnees: DataSource[];
     rainfall: DataSource[];
+    environmental?: DataSource[];
 }
