@@ -24,33 +24,39 @@ interface MapClientProps {
     geoJsonData: any;
     populationData: CityData | null;
     rainfallData?: RainfallData;
+    // Add this prop
+    environmentalData?: any;
     currentDataType: DataType;
     currentSourceId: number | null;
     customThresholds: number[];
     onFeatureClick?: (feature: any) => void;
 }
 
-export default function MapClient({
-    geoJsonData,
-    populationData,
-    rainfallData,
-    currentDataType,
-    currentSourceId,
-    customThresholds,
-    onFeatureClick
+export default function MapClient({ 
+    geoJsonData, 
+    populationData, 
+    rainfallData, 
+    environmentalData, // Destructure this
+    currentDataType, 
+    currentSourceId, 
+    customThresholds, 
+    onFeatureClick 
 }: MapClientProps) {
 
     const style = (feature: any) => {
-        return getFeatureStyle(feature, currentDataType, populationData, rainfallData, customThresholds);
+        // Pass environmentalData here
+        return getFeatureStyle(feature, currentDataType, populationData, rainfallData, environmentalData, customThresholds);
     };
 
     const onEachFeature = (feature: any, layer: L.Layer) => {
+        // Pass environmentalData here
         setupFeatureInteractions(
             feature,
             layer,
             currentDataType,
             populationData,
             rainfallData,
+            environmentalData,
             customThresholds,
             onFeatureClick
         );
@@ -93,6 +99,7 @@ export default function MapClient({
                     border-radius: 12px;
                     padding: 12px;
                     backdrop-filter: blur(12px);
+                    min-width: 200px;
                 }
                 .custom-tooltip-env:before {
                     border-top-color: rgba(15, 23, 42, 0.98) !important;

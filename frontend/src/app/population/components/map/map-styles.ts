@@ -2,8 +2,8 @@ import { DATA_TYPES } from '../../types';
 import { getColor } from '../../utils/color-calculator';
 import { findPopulation, findRainData } from '../../utils/data-finder';
 import { CityData, RainfallData } from '../../types';
-import environmentalJson from '../../syria_environmental_data_report.json';
 import { getCanonicalCityName } from '@/lib/city-name-standardizer';
+
 type DataType = typeof DATA_TYPES[keyof typeof DATA_TYPES];
 
 const ARABIC_TO_ENGLISH_CITY_MAP: { [key: string]: string } = {
@@ -39,6 +39,7 @@ export function getFeatureStyle(
     currentDataType: DataType,
     populationData: CityData | null,
     rainfallData: RainfallData | undefined,
+    environmentalData: any | undefined, // Add argument
     customThresholds: number[]
 ) {
     let value = 0;
@@ -50,10 +51,22 @@ export function getFeatureStyle(
             value = target.rainfall;
         }
     } else if (currentDataType === DATA_TYPES.ENVIRONMENTAL) {
+        if (!environmentalData) {
+             return {
+                fillColor: '#1e293b',
+                weight: 1.5,
+                opacity: 1,
+                color: '#334155',
+                fillOpacity: 0.5
+            };
+        }
+
         const name = feature.properties.province_name || feature.properties.ADM2_AR || feature.properties.ADM1_AR || feature.properties.Name;
         const nameAr = getCanonicalCityName(name);
         const englishName = ARABIC_TO_ENGLISH_CITY_MAP[nameAr] || nameAr;
-        const envData = (environmentalJson as any).cities?.[nameAr] || (environmentalJson as any).cities?.[englishName] || (environmentalJson as any).cities?.[name];
+        
+        // Use passed data object
+        const envData = environmentalData.cities?.[nameAr] || environmentalData.cities?.[englishName] || environmentalData.cities?.[name];
 
         if (envData) {
             const temp = envData.current_conditions?.temperature_celsius || 15;

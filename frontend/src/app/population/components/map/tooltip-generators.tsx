@@ -65,7 +65,7 @@ export function generateEnvironmentalTooltipHtml(name: string, data: any) {
 
     // Weather icon based on description
     let weatherIcon = '☀️';
-    const desc = weatherDesc.toLowerCase();
+    const desc = (weatherDesc || '').toLowerCase();
     if (desc.includes('rain') || desc.includes('drizzle')) weatherIcon = '🌧️';
     else if (desc.includes('overcast') || desc.includes('cloudy')) weatherIcon = '☁️';
     else if (desc.includes('partly') || desc.includes('mainly clear')) weatherIcon = '⛅';

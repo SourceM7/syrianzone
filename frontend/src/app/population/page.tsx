@@ -12,15 +12,10 @@ export const metadata: Metadata = {
     },
 };
 
-export default async function PopulationPage() {
-    const [data, environmentalData] = await Promise.all([
-        fetchPopulationData(),
-        fetchEnvironmentalData()
-    ]);
-
+export default function PopulationPage() {
     return (
         <div className="h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-background">
-            <PopulationClient initialData={data} environmentalData={environmentalData} />
+            <PopulationClient />
         </div>
     );
 }

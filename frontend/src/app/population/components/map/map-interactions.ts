@@ -3,8 +3,7 @@ import { DATA_TYPES, DATA_TYPE_CONFIG, CityData, RainfallData } from '../../type
 import { getCanonicalCityName } from '@/lib/city-name-standardizer';
 import { findPopulation, findRainData } from '../../utils/data-finder';
 import { generateRainChartHtml, generatePopulationTooltipHtml, generateEnvironmentalTooltipHtml } from './tooltip-generators';
-import { getFeatureStyle, getHighlightStyle } from './map-styles';
-import environmentalJson from '../../syria_environmental_data_report.json';
+import { getHighlightStyle, getFeatureStyle } from './map-styles';
 
 type DataType = typeof DATA_TYPES[keyof typeof DATA_TYPES];
 
@@ -31,6 +30,7 @@ export function setupFeatureInteractions(
     currentDataType: DataType,
     populationData: CityData | null,
     rainfallData: RainfallData | undefined,
+    environmentalData: any | undefined, // Add this argument
     customThresholds: number[],
     onFeatureClick?: (feature: any) => void
 ) {
@@ -48,10 +48,11 @@ export function setupFeatureInteractions(
         }
 
         if (currentDataType === DATA_TYPES.ENVIRONMENTAL) {
-            const name = feature.properties.province_name || feature.properties.ADM2_AR || feature.properties.ADM1_AR || feature.properties.Name;
-            const nameAr = getCanonicalCityName(name);
+            if (!environmentalData) return '';
+            
             const englishName = ARABIC_TO_ENGLISH_CITY_MAP[nameAr] || nameAr;
-            const envData = (environmentalJson as any).cities?.[nameAr] || (environmentalJson as any).cities?.[englishName] || (environmentalJson as any).cities?.[name];
+            const envData = environmentalData.cities?.[nameAr] || environmentalData.cities?.[englishName] || environmentalData.cities?.[name];
+            
             if (envData) {
                 return generateEnvironmentalTooltipHtml(nameAr, envData);
             }
@@ -82,7 +83,8 @@ export function setupFeatureInteractions(
         },
         mouseout: (e) => {
             const l = e.target;
-            const style = getFeatureStyle(feature, currentDataType, populationData, rainfallData, customThresholds);
+            // Pass environmentalData here too to revert style correctly
+            const style = getFeatureStyle(feature, currentDataType, populationData, rainfallData, environmentalData, customThresholds);
             l.setStyle(style);
         },
         click: () => {

@@ -57,14 +57,15 @@ export const DATA_TYPE_CONFIG = {
             { label: 'أكثر من 500 مم', color: '#006994' }
         ]
     },
+
     [DATA_TYPES.ENVIRONMENTAL]: {
-        label: 'البيانات البيئية',
-        labelAr: 'البيئة',
-        colors: { none: '#1e293b', low: '#0891b2', medium: '#06b6d4', high: '#22d3ee' },
-        thresholds: [1, 1, 1],
+        label: 'البيئة والمناخ',
+        labelAr: 'المناخ',
+        colors: { none: '#2a3033', low: '#065f46', medium: '#059669', high: '#10b981' },
+        thresholds: [1, 2, 3], // Adjust based on your logic
         legend: [
-            { label: 'لا توجد بيانات', color: '#1e293b' },
-            { label: 'بيانات بيئية متاحة', color: '#0891b2' }
+            { label: 'بيانات المناخ', color: '#10b981' },
+            { label: 'لا توجد بيانات', color: '#2a3033' }
         ]
     }
 };
