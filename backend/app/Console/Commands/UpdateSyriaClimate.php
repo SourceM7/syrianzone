@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\Population\SyriaClimateService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class UpdateSyriaClimate extends Command
@@ -21,6 +22,8 @@ class UpdateSyriaClimate extends Command
         try {
             $service = new SyriaClimateService();
             $service->setOutput($this->output)->updateAllCities();
+
+            Cache::forget('population_env_report');
 
             $duration = $startTime->diffInSeconds(now());
             $this->info("✓ Climate data updated successfully ({$duration}s)");
