@@ -83,7 +83,7 @@ export default function PopulationClient() {
 
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-                const masterResponse = await fetch(`${apiUrl}/api/population/master`);
+                const masterResponse = await fetch(`${apiUrl}/population/master`);
                 if (!masterResponse.ok) throw new Error('Failed to fetch master data');
                 const masterData = await masterResponse.json();
 
