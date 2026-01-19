@@ -90,7 +90,7 @@ export default function PopulationClient() {
                 setLivePopulationData(masterData.groups);
                 setRainfallData(masterData.rainfall_data);
 
-                const envResponse = await fetch(`${apiUrl}/api/population/env-report`);
+                const envResponse = await fetch(`${apiUrl}/population/env-report`);
                 if (!envResponse.ok) throw new Error('Failed to fetch environmental data');
                 const envData = await envResponse.json();
                 setEnvironmentalData(envData);
