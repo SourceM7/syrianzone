@@ -60,12 +60,16 @@ export const DATA_TYPE_CONFIG = {
 
     [DATA_TYPES.ENVIRONMENTAL]: {
         label: 'البيئة والمناخ',
-        labelAr: 'المناخ',
-        colors: { none: '#2a3033', low: '#065f46', medium: '#059669', high: '#10b981' },
-        thresholds: [1, 2, 3], // Adjust based on your logic
+        labelAr: 'الحرارة والمناخ', // More specific label
+        colors: { none: '#1e293b', low: '#3b82f6', medium: '#22c55e', high: '#ef4444' },
+        thresholds: [10, 20, 30], 
+        // Updated legend to match the temperature colors in map-styles.ts
         legend: [
-            { label: 'بيانات المناخ', color: '#10b981' },
-            { label: 'لا توجد بيانات', color: '#2a3033' }
+            { label: 'بارد (< 10°)', color: '#3b82f6' },   // Blue
+            { label: 'معتدل (10°-25°)', color: '#22c55e' }, // Green
+            { label: 'دافئ (25°-30°)', color: '#eab308' },  // Yellow
+            { label: 'حار (> 30°)', color: '#ef4444' },     // Red
+            { label: 'لا توجد بيانات', color: '#1e293b' }    // Dark Slate
         ]
     }
 };
